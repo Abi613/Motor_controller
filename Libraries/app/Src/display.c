@@ -15,7 +15,7 @@
 #include "mode.h"
 #include "motor.h"
 #include "fault.h"
-#include "../drivers/ssd1306.h"
+#include "ssd1306.h"
 #include <stdio.h>
 
 /*===========================================================================*/

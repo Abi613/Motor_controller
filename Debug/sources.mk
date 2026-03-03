@@ -25,4 +25,7 @@ SUBDIRS := \
 Core/Src \
 Core/Startup \
 Drivers/STM32F1xx_HAL_Driver/Src \
+Libraries/app/Src \
+Libraries/control/Src \
+Libraries/driver/Src \
 

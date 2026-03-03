@@ -1,0 +1,8 @@
+../Libraries/app/Src/mode.c:48:6:Mode_Init	1
+../Libraries/app/Src/mode.c:59:6:Mode_Update	1
+../Libraries/app/Src/mode.c:69:6:Mode_Set	3
+../Libraries/app/Src/mode.c:91:14:Mode_Get	1
+../Libraries/app/Src/mode.c:101:13:Mode_GetName	2
+../Libraries/app/Src/mode.c:117:16:Mode_IsTransitionValid	12
+../Libraries/app/Src/mode.c:136:13:Mode_OnEnter	4
+../Libraries/app/Src/mode.c:155:13:Mode_OnExit	2

@@ -1,0 +1,5 @@
+../Libraries/driver/Src/i2c.c:17:6:I2C_Init	8	static
+../Libraries/driver/Src/i2c.c:53:14:I2C_Write	32	static
+../Libraries/driver/Src/i2c.c:67:14:I2C_Read	32	static
+../Libraries/driver/Src/i2c.c:81:14:I2C_WriteReg	24	static
+../Libraries/driver/Src/i2c.c:92:9:I2C_IsDeviceReady	16	static

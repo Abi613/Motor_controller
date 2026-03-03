@@ -88,7 +88,7 @@
 /*===========================================================================*/
 extern ADC_HandleTypeDef  hadc1;
 extern I2C_HandleTypeDef  hi2c1;
-extern TIM_HandleTypeDef  htim2;
+extern TIM_HandleTypeDef  htim1;
 
 /*===========================================================================*/
 /* APPLICATION CONSTANTS                                                      */

@@ -6,19 +6,34 @@
  */
 
 #include "gpio.h"
-#include "../board.h"
+#include "board.h"
 
 /**
  * @brief  Configure all GPIO pins defined in board.h.
  *         Called once at startup from main.c after MX_GPIO_Init().
  */
 void GPIO_Init(void)
-{
-    /* TODO: Enable GPIO clocks and configure modes/speeds if not done by MX */
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-}
+
+	{
+	  GPIO_InitTypeDef GPIO_InitStruct = {0};
+	/* USER CODE BEGIN MX_GPIO_Init_1 */
+	/* USER CODE END MX_GPIO_Init_1 */
+
+	  /* GPIO Ports Clock Enable */
+	  __HAL_RCC_GPIOD_CLK_ENABLE();
+	  __HAL_RCC_GPIOA_CLK_ENABLE();
+	  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+	  /*Configure GPIO pins : PB0 PB1 PB2 */
+	  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2;
+	  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	  GPIO_InitStruct.Pull = GPIO_NOPULL;
+	  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+	/* USER CODE BEGIN MX_GPIO_Init_2 */
+	/* USER CODE END MX_GPIO_Init_2 */
+	}
+
 
 /**
  * @brief  Write a logic level to a GPIO pin.

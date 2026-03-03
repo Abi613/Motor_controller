@@ -1,6 +1,4 @@
-Core/Src/main.o: ../Core/Src/main.c ../Libraries/driver/Inc/adc.h \
- ../Libraries/app/Inc/display.h ../Libraries/app/Inc/fault.h \
- ../Libraries/driver/Inc/i2c.h \
+Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
@@ -28,14 +26,10 @@ Core/Src/main.o: ../Core/Src/main.c ../Libraries/driver/Inc/adc.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
- ../Libraries/app/Inc/mode.h ../Libraries/app/Inc/motor.h \
- ../Libraries/driver/Inc/pwm.h ../Libraries/driver/Inc/ssd1306.h \
- ../Core/Inc/main.h ../Core/Inc/board.h ../Libraries/driver/Inc/gpio.h \
- ../Libraries/control/Inc/pi.h
-../Libraries/driver/Inc/adc.h:
-../Libraries/app/Inc/display.h:
-../Libraries/app/Inc/fault.h:
-../Libraries/driver/Inc/i2c.h:
+ ../Core/Inc/board.h ../Libraries/driver/Inc/gpio.h \
+ ../Libraries/driver/Inc/pwm.h ../Libraries/driver/Inc/adc.h \
+ ../Libraries/driver/Inc/i2c.h
+../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h:
@@ -63,11 +57,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Libraries/driver/Inc/adc.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
-../Libraries/app/Inc/mode.h:
-../Libraries/app/Inc/motor.h:
-../Libraries/driver/Inc/pwm.h:
-../Libraries/driver/Inc/ssd1306.h:
-../Core/Inc/main.h:
 ../Core/Inc/board.h:
 ../Libraries/driver/Inc/gpio.h:
-../Libraries/control/Inc/pi.h:
+../Libraries/driver/Inc/pwm.h:
+../Libraries/driver/Inc/adc.h:
+../Libraries/driver/Inc/i2c.h:

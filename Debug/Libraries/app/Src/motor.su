@@ -1,0 +1,10 @@
+../Libraries/app/Src/motor.c:34:6:Motor_Init	16	static
+../Libraries/app/Src/motor.c:55:6:Motor_Update	16	static
+../Libraries/app/Src/motor.c:84:6:Motor_Enable	8	static
+../Libraries/app/Src/motor.c:94:6:Motor_Disable	8	static
+../Libraries/app/Src/motor.c:106:6:Motor_EmergencyStop	8	static
+../Libraries/app/Src/motor.c:119:6:Motor_SetTargetSpeed	16	static
+../Libraries/app/Src/motor.c:126:7:Motor_GetTargetSpeed	4	static
+../Libraries/app/Src/motor.c:129:7:Motor_GetActualSpeed	4	static
+../Libraries/app/Src/motor.c:132:7:Motor_GetCurrent	8	static
+../Libraries/app/Src/motor.c:135:9:Motor_IsEnabled	4	static

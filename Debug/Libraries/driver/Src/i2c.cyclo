@@ -1,0 +1,5 @@
+../Libraries/driver/Src/i2c.c:17:6:I2C_Init	2
+../Libraries/driver/Src/i2c.c:53:14:I2C_Write	1
+../Libraries/driver/Src/i2c.c:67:14:I2C_Read	1
+../Libraries/driver/Src/i2c.c:81:14:I2C_WriteReg	1
+../Libraries/driver/Src/i2c.c:92:9:I2C_IsDeviceReady	2

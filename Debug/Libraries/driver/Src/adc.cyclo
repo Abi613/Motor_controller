@@ -1,0 +1,6 @@
+../Libraries/driver/Src/adc.c:27:6:ADC_Init	3
+../Libraries/driver/Src/adc.c:79:6:ADC_StartConversion	1
+../Libraries/driver/Src/adc.c:89:10:ADC_GetRaw	2
+../Libraries/driver/Src/adc.c:102:7:ADC_GetCurrent_A	1
+../Libraries/driver/Src/adc.c:113:7:ADC_GetVbus_V	1
+../Libraries/driver/Src/adc.c:124:6:ADC_ConversionComplete_Callback	1

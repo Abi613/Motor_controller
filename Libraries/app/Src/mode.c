@@ -16,8 +16,8 @@
 #include "mode.h"
 #include "fault.h"
 #include "motor.h"
-#include "../drivers/gpio.h"
-#include "../board.h"
+#include "gpio.h"
+#include "board.h"
 #include <string.h>
 
 /*===========================================================================*/

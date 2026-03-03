@@ -12,9 +12,9 @@
 
 #include "fault.h"
 #include "mode.h"
-#include "../drivers/adc.h"
-#include "../drivers/gpio.h"
-#include "../board.h"
+#include "adc.h"
+#include "gpio.h"
+#include "board.h"
 
 /*===========================================================================*/
 /* PRIVATE VARIABLES                                                          */

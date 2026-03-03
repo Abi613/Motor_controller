@@ -10,7 +10,7 @@
 
 #include "ssd1306.h"
 #include "i2c.h"
-#include "../board.h"
+#include "board.h"
 #include <string.h>
 
 /*===========================================================================*/

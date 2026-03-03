@@ -11,11 +11,11 @@
 #include "motor.h"
 #include "fault.h"
 #include "mode.h"
-#include "../drivers/pwm.h"
-#include "../drivers/adc.h"
-#include "../drivers/gpio.h"
-#include "../control/pi.h"
-#include "../board.h"
+#include "pwm.h"
+#include "adc.h"
+#include "gpio.h"
+#include "pi.h"
+#include "board.h"
 
 /*===========================================================================*/
 /* PRIVATE VARIABLES                                                          */

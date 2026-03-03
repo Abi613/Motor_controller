@@ -1,0 +1,5 @@
+../Libraries/driver/Src/pwm.c:27:6:PWM_Init	80	static
+../Libraries/driver/Src/pwm.c:98:6:PWM_SetDuty	24	static
+../Libraries/driver/Src/pwm.c:116:6:PWM_Start	8	static
+../Libraries/driver/Src/pwm.c:128:6:PWM_Stop	8	static
+../Libraries/driver/Src/pwm.c:140:9:PWM_GetDuty	4	static

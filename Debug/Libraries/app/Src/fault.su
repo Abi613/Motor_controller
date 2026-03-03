@@ -1,0 +1,10 @@
+../Libraries/app/Src/fault.c:31:6:Fault_Init	4	static
+../Libraries/app/Src/fault.c:40:6:Fault_Update	8	static
+../Libraries/app/Src/fault.c:62:6:Fault_Trigger	16	static
+../Libraries/app/Src/fault.c:72:6:Fault_TriggerEstop	4	static
+../Libraries/app/Src/fault.c:83:6:Fault_Clear	16	static
+../Libraries/app/Src/fault.c:95:6:Fault_ClearAll	8	static
+../Libraries/app/Src/fault.c:105:9:Fault_IsActive	16	static
+../Libraries/app/Src/fault.c:111:9:Fault_AnyActive	4	static
+../Libraries/app/Src/fault.c:117:13:Fault_GetAll	4	static
+../Libraries/app/Src/fault.c:126:13:Fault_GetName	16	static
