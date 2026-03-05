@@ -8,6 +8,7 @@
 
 #include "i2c.h"
 #include "board.h"
+#include "main.h"
 
 #define I2C_TIMEOUT_MS   10U    /**< Max wait per I2C transaction (ms) */
 
@@ -52,6 +53,7 @@ void I2C_Init(void)
  */
 I2C_Status_t I2C_Write(uint8_t dev_addr, const uint8_t *data, uint16_t len)
 {
+    if ((data == NULL) || (len == 0U)) { return I2C_ERROR; }
     HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(
         &hi2c1, (uint16_t)(dev_addr << 1), (uint8_t *)data, len, I2C_TIMEOUT_MS);
     return (status == HAL_OK) ? I2C_OK : I2C_ERROR;
@@ -66,6 +68,7 @@ I2C_Status_t I2C_Write(uint8_t dev_addr, const uint8_t *data, uint16_t len)
  */
 I2C_Status_t I2C_Read(uint8_t dev_addr, uint8_t *data, uint16_t len)
 {
+    if ((data == NULL) || (len == 0U)) { return I2C_ERROR; }
     HAL_StatusTypeDef status = HAL_I2C_Master_Receive(
         &hi2c1, (uint16_t)(dev_addr << 1), data, len, I2C_TIMEOUT_MS);
     return (status == HAL_OK) ? I2C_OK : I2C_ERROR;
