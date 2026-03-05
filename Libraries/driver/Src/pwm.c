@@ -5,6 +5,17 @@
 
 static uint8_t s_current_duty = 0U;
 
+static uint32_t PWM_PhaseToChannel(uint8_t phase)
+{
+    switch (phase)
+    {
+        case 0U: return TIM_CHANNEL_1;
+        case 1U: return TIM_CHANNEL_2;
+        case 2U: return TIM_CHANNEL_3;
+        default: return TIM_CHANNEL_1;
+    }
+}
+
 void PWM_Init(void)
 {
     TIM_MasterConfigTypeDef sMasterConfig = {0};
@@ -50,8 +61,8 @@ void PWM_Init(void)
     sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
     sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
     sBreakDeadTimeConfig.DeadTime = 72U;
-    sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-    sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+    sBreakDeadTimeConfig.BreakState = TIM_BREAK_ENABLE;
+    sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_LOW;
     sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
     if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
     {
@@ -63,27 +74,38 @@ void PWM_Init(void)
 
 void PWM_SetDuty(uint8_t duty_percent)
 {
-    uint32_t ccr;
-
     if (duty_percent > MOTOR_MAX_DUTY)
     {
         duty_percent = MOTOR_MAX_DUTY;
     }
 
     s_current_duty = duty_percent;
-    ccr = ((uint32_t)duty_percent * PWM_PERIOD_TICKS) / 100U;
-
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ccr);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, ccr);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, ccr);
 }
 
 void PWM_SetStep(uint8_t high_phase, uint8_t low_phase, uint8_t float_phase, uint8_t duty_percent)
 {
-    (void)high_phase;
-    (void)low_phase;
-    (void)float_phase;
+    uint32_t ccr;
+    uint32_t high_ch = PWM_PhaseToChannel(high_phase);
+    uint32_t low_ch = PWM_PhaseToChannel(low_phase);
+    uint32_t flt_ch = PWM_PhaseToChannel(float_phase);
+
     PWM_SetDuty(duty_percent);
+    ccr = ((uint32_t)s_current_duty * PWM_PERIOD_TICKS) / 100U;
+
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0U);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0U);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0U);
+
+    (void)HAL_TIM_PWM_Stop(&htim1, flt_ch);
+    (void)HAL_TIMEx_PWMN_Stop(&htim1, flt_ch);
+
+    __HAL_TIM_SET_COMPARE(&htim1, high_ch, ccr);
+    (void)HAL_TIM_PWM_Start(&htim1, high_ch);
+    (void)HAL_TIMEx_PWMN_Stop(&htim1, high_ch);
+
+    __HAL_TIM_SET_COMPARE(&htim1, low_ch, PWM_PERIOD_TICKS - 1U);
+    (void)HAL_TIM_PWM_Stop(&htim1, low_ch);
+    (void)HAL_TIMEx_PWMN_Start(&htim1, low_ch);
 }
 
 void PWM_Start(void)
@@ -91,15 +113,25 @@ void PWM_Start(void)
     (void)HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     (void)HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
     (void)HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+    (void)HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+    (void)HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+    (void)HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
     __HAL_TIM_MOE_ENABLE(&htim1);
 }
 
 void PWM_Stop(void)
 {
     PWM_SetDuty(0U);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0U);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0U);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0U);
     (void)HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
     (void)HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
     (void)HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
+    (void)HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
+    (void)HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
+    (void)HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_3);
+    __HAL_TIM_MOE_DISABLE(&htim1);
 }
 
 uint8_t PWM_GetDuty(void)

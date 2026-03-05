@@ -21,6 +21,9 @@ ADC_HandleTypeDef hadc1;
 I2C_HandleTypeDef hi2c1;
 TIM_HandleTypeDef htim1;
 
+static volatile uint32_t s_sched_due_ms = 0U;
+static void (*s_sched_cb)(void) = NULL;
+
 void SystemClock_Config(void);
 
 int main(void)
@@ -40,9 +43,19 @@ int main(void)
 
   while (1)
   {
+    uint32_t now = HAL_GetTick();
+
     Fault_Update();
     Mode_Update();
     Motor_Update();
+
+    if ((s_sched_cb != NULL) && (now >= s_sched_due_ms))
+    {
+      void (*cb)(void) = s_sched_cb;
+      s_sched_cb = NULL;
+      cb();
+    }
+
     Display_Update();
     HAL_Delay(CONTROL_LOOP_MS);
   }
@@ -94,11 +107,13 @@ uint32_t Board_GetTickMs(void)
 
 void Board_ScheduleOnceMs(uint32_t delay_ms, void (*cb)(void))
 {
-  (void)delay_ms;
-  if (cb != NULL)
+  if (cb == NULL)
   {
-    cb();
+    return;
   }
+
+  s_sched_due_ms = HAL_GetTick() + delay_ms;
+  s_sched_cb = cb;
 }
 
 void Error_Handler(void)

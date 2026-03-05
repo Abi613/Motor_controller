@@ -20,6 +20,14 @@
 #define ESTOP_PIN               GPIO_PIN_2
 #define ESTOP_PORT              GPIOA
 
+/* Optional Hall sensors */
+#define HALL_U_PIN              GPIO_PIN_3
+#define HALL_U_PORT             GPIOB
+#define HALL_V_PIN              GPIO_PIN_4
+#define HALL_V_PORT             GPIOB
+#define HALL_W_PIN              GPIO_PIN_5
+#define HALL_W_PORT             GPIOB
+
 /* Digital outputs */
 #define LED_STATUS_PIN          GPIO_PIN_13
 #define LED_STATUS_PORT         GPIOC
@@ -59,6 +67,11 @@
 #define ADC_VBUS_PORT           GPIOA
 #define ADC_VBUS_CHANNEL        ADC_CHANNEL_5
 
+/* Optional ADC BEMF sampling channels */
+#define ADC_BEMF_U_CHANNEL      ADC_CHANNEL_0
+#define ADC_BEMF_V_CHANNEL      ADC_CHANNEL_1
+#define ADC_BEMF_W_CHANNEL      ADC_CHANNEL_2
+
 /* I2C */
 #define I2C_PERIPH              I2C1
 #define I2C_SCL_PIN             GPIO_PIN_6
@@ -76,6 +89,8 @@ extern TIM_HandleTypeDef htim1;
 #define ADC_VREF_MV             3300U
 #define CURRENT_SENSE_GAIN      10.0f
 #define CURRENT_SENSE_SHUNT_mR  10U
+#define VBUS_DIVIDER_RATIO      11.0f
+#define BEMF_NEUTRAL_RATIO      0.5f
 
 /* PWM constants */
 #define PWM_FREQ_HZ             20000U
@@ -87,6 +102,13 @@ extern TIM_HandleTypeDef htim1;
 #define MOTOR_MAX_DUTY          95U
 #define CONTROL_LOOP_MS         1U
 #define FAULT_CURRENT_LIMIT_A   10.0f
+#define FAULT_VBUS_OV_LIMIT_V   26.0f
+#define FAULT_VBUS_UV_LIMIT_V   8.0f
+#define STALL_TIMEOUT_MS        120U
+#define STARTUP_DUTY_PCT        20U
+
+/* 0=sensorless BEMF ADC, 1=hall sensors */
+#define MOTOR_COMM_MODE_DEFAULT 0U
 
 /* Display */
 #define OLED_I2C_ADDR           0x3CU
