@@ -8,9 +8,6 @@
 #include "board.h"
 #include <stdint.h>
 
-/* --------------------------------------------------------------------------
- * Commutation table: high-PWM phase, low-brake phase, floating phase, ZC dir
- * -------------------------------------------------------------------------- */
 typedef enum { PH_U = 0, PH_V = 1, PH_W = 2 } Phase_t;
 
 typedef struct
@@ -38,30 +35,25 @@ static uint8_t s_motor_enabled  = 0U;
 static uint8_t s_comm_step      = 0U;
 static uint8_t s_duty_pct       = 0U;
 
-/* Open-loop ramp */
 static uint32_t s_ol_period_ms  = OL_START_PERIOD_MS;
 static uint32_t s_ol_elapsed_ms = 0U;
 
-/* Back-EMF lock detection */
 static uint8_t  s_bemf_lock_cnt = 0U;
 static uint8_t  s_bemf_locked   = 0U;
 static uint32_t s_blank_end_ms  = 0U;
 
-/* Closed-loop ZC timing (written in ISR) */
-static volatile uint32_t s_zc_timestamp_ms = 0U;
+static volatile uint32_t s_last_zc_ms = 0U;
 static volatile uint32_t s_half_period_ms  = 0U;
-static volatile uint8_t  s_zc_pending      = 0U;
 
-/* Alignment timer */
 static uint32_t s_align_elapsed_ms = 0U;
+static uint32_t s_last_comm_ms = 0U;
 
 static void     Commutate(uint8_t step, uint8_t duty);
 static void     UpdateAlignment(SystemMode_t phase);
 static void     UpdateOpenLoop(void);
 static void     UpdateClosedLoop(void);
 static uint32_t GetTickMs(void);
-
-/* -------------------------------------------------------------------------- */
+static uint8_t  ReadHallStep(uint8_t *step_out);
 
 void Motor_Init(void)
 {
@@ -74,15 +66,13 @@ void Motor_Init(void)
     s_ol_elapsed_ms     = 0U;
     s_bemf_lock_cnt     = 0U;
     s_bemf_locked       = 0U;
-    s_zc_pending        = 0U;
     s_align_elapsed_ms  = 0U;
+    s_last_zc_ms        = 0U;
+    s_half_period_ms    = 0U;
+    s_last_comm_ms      = 0U;
 
-    PI_Init(&s_pi,
-            /* Kp      */ 0.5f,
-            /* Ki      */ 0.1f,
-            /* dt      */ (float)CONTROL_LOOP_MS / 1000.0f,
-            /* out_min */ (float)MOTOR_MIN_DUTY,
-            /* out_max */ (float)MOTOR_MAX_DUTY);
+    PI_Init(&s_pi, 0.35f, 0.12f, (float)CONTROL_LOOP_MS / 1000.0f,
+            (float)MOTOR_MIN_DUTY, (float)MOTOR_MAX_DUTY);
 
     GPIO_WritePin(MOTOR_EN_PORT, MOTOR_EN_PIN, GPIO_PIN_RESET);
     PWM_SetDuty(0U);
@@ -90,12 +80,38 @@ void Motor_Init(void)
 
 void Motor_Update(void)
 {
+    uint32_t now = GetTickMs();
+
     if (!s_motor_enabled) { return; }
 
     if (ADC_GetCurrent_A() > FAULT_CURRENT_LIMIT_A)
     {
         Fault_Trigger(FAULT_OVERCURRENT);
         return;
+    }
+
+    if ((now - s_last_comm_ms) > STALL_TIMEOUT_MS && Mode_Get() != MOTOR_IDLE)
+    {
+        Fault_Trigger(FAULT_STALL);
+        return;
+    }
+
+    if (MOTOR_COMM_MODE_DEFAULT == 1U)
+    {
+        uint8_t hall_step = 0U;
+        if (ReadHallStep(&hall_step) != 0U)
+        {
+            s_comm_step = hall_step;
+            Commutate(s_comm_step, s_duty_pct);
+            s_last_comm_ms = now;
+        }
+    }
+    else if ((Mode_Get() == MOTOR_OPEN_LOOP) || (Mode_Get() == MOTOR_CLOSED_LOOP))
+    {
+        if ((now >= s_blank_end_ms) && (ADC_BEMFZeroCrossDetected() != 0U))
+        {
+            Motor_BEMF_ZeroCrossISR();
+        }
     }
 
     switch (Mode_Get())
@@ -114,18 +130,22 @@ void Motor_Enable(void)
     s_ol_elapsed_ms     = 0U;
     s_bemf_lock_cnt     = 0U;
     s_bemf_locked       = 0U;
-    s_zc_pending        = 0U;
     s_align_elapsed_ms  = 0U;
     s_comm_step         = 0U;
+    s_duty_pct          = STARTUP_DUTY_PCT;
+    s_half_period_ms    = 0U;
+    s_last_zc_ms        = 0U;
 
     GPIO_WritePin(MOTOR_EN_PORT, MOTOR_EN_PIN, GPIO_PIN_SET);
     PWM_Start();
+    Commutate(s_comm_step, s_duty_pct);
+    s_last_comm_ms = GetTickMs();
     s_motor_enabled = 1U;
 }
 
 void Motor_Disable(void)
 {
-    PWM_SetDuty(0U);
+    PWM_Stop();
     GPIO_WritePin(MOTOR_EN_PORT, MOTOR_EN_PIN, GPIO_PIN_RESET);
     s_motor_enabled = 0U;
     s_bemf_locked   = 0U;
@@ -134,7 +154,6 @@ void Motor_Disable(void)
 
 void Motor_EmergencyStop(void)
 {
-    PWM_SetDuty(0U);
     PWM_Stop();
     GPIO_WritePin(MOTOR_EN_PORT, MOTOR_EN_PIN, GPIO_PIN_RESET);
     s_motor_enabled = 0U;
@@ -144,9 +163,20 @@ void Motor_EmergencyStop(void)
 
 void Motor_CommutateNext(void)
 {
-    s_comm_step    = (s_comm_step + 1U) % BLDC_STEPS;
+    uint32_t now = GetTickMs();
+    uint32_t blank_ms;
+
+    s_comm_step = (s_comm_step + 1U) % BLDC_STEPS;
     Commutate(s_comm_step, s_duty_pct);
-    s_blank_end_ms = GetTickMs() + (s_ol_period_ms * BEMF_BLANK_PCT / 100U);
+
+    blank_ms = (s_ol_period_ms * BEMF_BLANK_PCT) / 100U;
+    if (blank_ms < 1U)
+    {
+        blank_ms = 1U;
+    }
+
+    s_blank_end_ms = now + blank_ms;
+    s_last_comm_ms = now;
 }
 
 void Motor_BEMF_ZeroCrossISR(void)
@@ -155,11 +185,12 @@ void Motor_BEMF_ZeroCrossISR(void)
 
     if (now < s_blank_end_ms) { return; }
 
-    if (s_zc_timestamp_ms != 0U)
+    if (s_last_zc_ms != 0U)
     {
-        s_half_period_ms = (now - s_zc_timestamp_ms) / 2U;
+        uint32_t zc_period = now - s_last_zc_ms;
+        s_half_period_ms = (zc_period > 1U) ? (zc_period / 2U) : 1U;
     }
-    s_zc_timestamp_ms = now;
+    s_last_zc_ms = now;
 
     if (Mode_Get() == MOTOR_CLOSED_LOOP)
     {
@@ -169,8 +200,6 @@ void Motor_BEMF_ZeroCrossISR(void)
     {
         if (++s_bemf_lock_cnt >= BEMF_LOCK_COUNT) { s_bemf_locked = 1U; }
     }
-
-    s_zc_pending = 1U;
 }
 
 void Motor_SetTargetSpeed(float speed_rpm)
@@ -183,8 +212,6 @@ float   Motor_GetTargetSpeed(void) { return s_target_speed;     }
 float   Motor_GetActualSpeed(void) { return s_actual_speed;     }
 float   Motor_GetCurrent(void)     { return ADC_GetCurrent_A(); }
 uint8_t Motor_IsEnabled(void)      { return s_motor_enabled;    }
-
-/* -------------------------------------------------------------------------- */
 
 static void UpdateAlignment(SystemMode_t phase)
 {
@@ -236,23 +263,44 @@ static void UpdateClosedLoop(void)
 {
     if (s_half_period_ms > 0U)
     {
-        float half_s   = (float)s_half_period_ms / 1000.0f;
+        float half_s = (float)s_half_period_ms / 1000.0f;
         s_actual_speed = (1.0f / (2.0f * half_s)) * 60.0f / (float)MOTOR_POLE_PAIRS;
     }
 
-    s_duty_pct   = (uint8_t)PI_Compute(&s_pi, s_target_speed, s_actual_speed);
-    s_zc_pending = 0U;
+    s_duty_pct = (uint8_t)PI_Compute(&s_pi, s_target_speed, s_actual_speed);
 }
 
 static void Commutate(uint8_t step, uint8_t duty)
 {
     if (step >= BLDC_STEPS) { return; }
-    const CommStep_t *cs = &s_comm_table[step];
-    PWM_SetStep(cs->high_phase, cs->low_phase, cs->float_phase, duty);
-    ADC_SelectBEMFChannel(cs->float_phase, cs->zc_rising);
+    PWM_SetStep(s_comm_table[step].high_phase,
+                s_comm_table[step].low_phase,
+                s_comm_table[step].float_phase,
+                duty);
+    ADC_SelectBEMFChannel(s_comm_table[step].float_phase, s_comm_table[step].zc_rising);
 }
 
 static uint32_t GetTickMs(void)
 {
     return Board_GetTickMs();
+}
+
+static uint8_t ReadHallStep(uint8_t *step_out)
+{
+    uint8_t hall_state = 0U;
+
+    hall_state |= (GPIO_ReadPin(HALL_U_PORT, HALL_U_PIN) == GPIO_PIN_SET) ? 0x4U : 0U;
+    hall_state |= (GPIO_ReadPin(HALL_V_PORT, HALL_V_PIN) == GPIO_PIN_SET) ? 0x2U : 0U;
+    hall_state |= (GPIO_ReadPin(HALL_W_PORT, HALL_W_PIN) == GPIO_PIN_SET) ? 0x1U : 0U;
+
+    switch (hall_state)
+    {
+        case 0x1U: *step_out = 0U; return 1U;
+        case 0x5U: *step_out = 1U; return 1U;
+        case 0x4U: *step_out = 2U; return 1U;
+        case 0x6U: *step_out = 3U; return 1U;
+        case 0x2U: *step_out = 4U; return 1U;
+        case 0x3U: *step_out = 5U; return 1U;
+        default:   return 0U;
+    }
 }

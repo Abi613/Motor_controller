@@ -6,14 +6,14 @@
 #define BLDC_STEPS              6U
 
 #define OL_START_PERIOD_MS      20U
-#define OL_MIN_PERIOD_MS        4U
+#define OL_MIN_PERIOD_MS        2U
 #define OL_RAMP_STEP_MS         1U
 
-#define BEMF_BLANK_PCT          30U
-#define BEMF_LOCK_COUNT         6U
+#define BEMF_BLANK_PCT          20U
+#define BEMF_LOCK_COUNT         8U
 
 #define ALIGN1_HOLD_MS          200U
-#define ALIGN2_HOLD_MS          100U
+#define ALIGN2_HOLD_MS          120U
 #define ALIGN_DUTY_PCT          30U
 
 void    Motor_Init(void);

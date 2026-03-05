@@ -17,6 +17,7 @@
 #include "fault.h"
 #include "ssd1306.h"
 #include "pwm.h"
+#include "adc.h"
 #include <stdio.h>
 
 /*===========================================================================*/
@@ -103,6 +104,6 @@ void Display_ShowIdle(void)
 {
     SSD1306_PrintString(0, 0,  "MODE: IDLE");
     SSD1306_PrintString(0, 16, "Motor stopped");
-    snprintf(s_line_buf, sizeof(s_line_buf), "Vbus: %.1fV", 0.0f);  /* TODO: ADC_GetVbus_V() */
+    snprintf(s_line_buf, sizeof(s_line_buf), "Vbus: %.1fV", ADC_GetVbus_V());
     SSD1306_PrintString(0, 32, s_line_buf);
 }
