@@ -1,8 +1,0 @@
-../Libraries/app/Src/mode.c:48:6:Mode_Init	8	static
-../Libraries/app/Src/mode.c:59:6:Mode_Update	4	static
-../Libraries/app/Src/mode.c:69:6:Mode_Set	16	static
-../Libraries/app/Src/mode.c:91:14:Mode_Get	4	static
-../Libraries/app/Src/mode.c:101:13:Mode_GetName	16	static
-../Libraries/app/Src/mode.c:117:16:Mode_IsTransitionValid	16	static
-../Libraries/app/Src/mode.c:136:13:Mode_OnEnter	16	static
-../Libraries/app/Src/mode.c:155:13:Mode_OnExit	16	static

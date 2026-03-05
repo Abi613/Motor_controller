@@ -119,4 +119,28 @@ extern TIM_HandleTypeDef  htim1;
 #define FAULT_CHECK_MS          10U
 #define CONTROL_LOOP_MS         1U
 
+#define MOTOR_POLE_PAIRS        4U
+#define MOTOR_MIN_DUTY          5U
+#define MOTOR_MAX_DUTY          95U
+#define CONTROL_LOOP_MS         1U
+#define FAULT_CURRENT_LIMIT_A   10.0f
+
+#define MOTOR_EN_PORT           GPIOA
+#define MOTOR_EN_PIN            GPIO_PIN_8
+
+/* Implement in BSP */
+uint32_t Board_GetTickMs(void);
+void     Board_ScheduleOnceMs(uint32_t delay_ms, void (*cb)(void));
+
+/* PWM HAL — configure half-bridges for one 6-step commutation pattern */
+void PWM_SetStep(uint8_t high_ph, uint8_t low_ph, uint8_t float_ph, uint8_t duty_pct);
+void PWM_SetDuty(uint8_t duty_pct);
+void PWM_Start(void);
+void PWM_Stop(void);
+
+/* ADC HAL */
+float ADC_GetCurrent_A(void);
+void  ADC_SelectBEMFChannel(uint8_t phase, uint8_t rising);
+
+
 #endif /* BOARD_H */

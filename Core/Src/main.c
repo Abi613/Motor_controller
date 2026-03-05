@@ -69,6 +69,8 @@ static void MX_TIM1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+int Duty_Cycle = MOTOR_MIN_DUTY;
+
 /* USER CODE END 0 */
 
 /**
@@ -109,15 +111,23 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
     /* USER CODE END WHILE */
+	 PWM_Start();
+	 while(Duty_Cycle>MOTOR_MAX_DUTY){
+		 Duty_Cycle += 10U;
+		 PWM_SetDuty(Duty_Cycle);
+	 }
+
+	 }
+
+	  }
 
     /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
-}
 
+  /* USER CODE END 3 */
 /**
   * @brief System Clock Configuration
   * @retval None

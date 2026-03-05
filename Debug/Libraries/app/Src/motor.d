@@ -1,6 +1,6 @@
 Libraries/app/Src/motor.o: ../Libraries/app/Src/motor.c \
- ../Libraries/app/Inc/motor.h ../Libraries/app/Inc/fault.h \
- ../Libraries/app/Inc/mode.h ../Libraries/driver/Inc/pwm.h \
+ ../Libraries/app/Inc/motor.h ../Libraries/app/Inc/mode.h \
+ ../Libraries/app/Inc/fault.h ../Libraries/driver/Inc/pwm.h \
  ../Libraries/driver/Inc/adc.h ../Libraries/driver/Inc/gpio.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
@@ -31,8 +31,8 @@ Libraries/app/Src/motor.o: ../Libraries/app/Src/motor.c \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
  ../Libraries/control/Inc/pi.h ../Core/Inc/board.h
 ../Libraries/app/Inc/motor.h:
-../Libraries/app/Inc/fault.h:
 ../Libraries/app/Inc/mode.h:
+../Libraries/app/Inc/fault.h:
 ../Libraries/driver/Inc/pwm.h:
 ../Libraries/driver/Inc/adc.h:
 ../Libraries/driver/Inc/gpio.h:
