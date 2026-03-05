@@ -78,9 +78,9 @@ uint8_t SSD1306_Init(void)
         }
     }
 
+    s_initialized = 1U;
     SSD1306_Clear();
     SSD1306_Flush();
-    s_initialized = 1U;
     return 0U;
 }
 
@@ -97,6 +97,11 @@ void SSD1306_Clear(void)
  */
 void SSD1306_Flush(void)
 {
+    if (!s_initialized)
+    {
+        return;
+    }
+
     /* Set full-screen address window */
     SSD1306_SendCmd(0x21); SSD1306_SendCmd(0); SSD1306_SendCmd(127); /* Col 0–127 */
     SSD1306_SendCmd(0x22); SSD1306_SendCmd(0); SSD1306_SendCmd(7);   /* Page 0–7  */
@@ -161,8 +166,31 @@ static I2C_Status_t SSD1306_SendCmd(uint8_t cmd)
  */
 static I2C_Status_t SSD1306_SendData(const uint8_t *data, uint16_t len)
 {
-    /* Prepend 0x40 control byte — requires a temp buffer or multi-write     */
-    /* TODO: Optimize using DMA or chunked writes for performance            */
-    (void)data; (void)len;
+    uint16_t offset = 0U;
+    uint8_t tx_buf[17];
+
+    if ((data == NULL) || (len == 0U))
+    {
+        return I2C_ERROR;
+    }
+
+    tx_buf[0] = SSD1306_DATA;
+
+    while (offset < len)
+    {
+        uint16_t chunk = len - offset;
+        if (chunk > 16U)
+        {
+            chunk = 16U;
+        }
+
+        memcpy(&tx_buf[1], &data[offset], chunk);
+        if (I2C_Write(OLED_I2C_ADDR, tx_buf, (uint16_t)(chunk + 1U)) != I2C_OK)
+        {
+            return I2C_ERROR;
+        }
+        offset += chunk;
+    }
+
     return I2C_OK;
 }

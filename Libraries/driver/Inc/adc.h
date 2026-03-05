@@ -22,5 +22,6 @@ uint16_t ADC_GetRaw(ADC_Channel_t channel);
 float    ADC_GetCurrent_A(void);
 float    ADC_GetVbus_V(void);
 void     ADC_ConversionComplete_Callback(void);  /**< Called from ISR         */
+void     ADC_SelectBEMFChannel(uint8_t phase, uint8_t rising);
 
 #endif /* DRIVERS_ADC_H */

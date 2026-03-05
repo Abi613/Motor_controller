@@ -21,6 +21,7 @@
 /*===========================================================================*/
 /** @brief Bitmask of currently active faults */
 static volatile FaultCode_t s_active_faults = FAULT_NONE;
+static volatile uint8_t s_estop_pending = 0U;
 
 /*===========================================================================*/
 /* PUBLIC FUNCTIONS                                                           */
@@ -31,6 +32,7 @@ static volatile FaultCode_t s_active_faults = FAULT_NONE;
 void Fault_Init(void)
 {
     s_active_faults = FAULT_NONE;
+    s_estop_pending = 0U;
 }
 
 /**
@@ -39,6 +41,13 @@ void Fault_Init(void)
  */
 void Fault_Update(void)
 {
+    if (s_estop_pending != 0U)
+    {
+        s_estop_pending = 0U;
+        s_active_faults |= FAULT_ESTOP;
+        Mode_Set(MOTOR_FAULT);
+    }
+
     /* --- Overcurrent check --- */
     if (ADC_GetCurrent_A() > FAULT_CURRENT_LIMIT_A)
     {
@@ -62,7 +71,7 @@ void Fault_Update(void)
 void Fault_Trigger(FaultCode_t code)
 {
     s_active_faults |= (uint8_t)code;
-    Mode_Set(MODE_FAULT);
+    Mode_Set(MOTOR_FAULT);
 }
 
 /**
@@ -71,9 +80,7 @@ void Fault_Trigger(FaultCode_t code)
  */
 void Fault_TriggerEstop(void)
 {
-    s_active_faults |= FAULT_ESTOP;
-    /* Mode_Set is not ISR-safe if it calls HAL — use a flag instead        */
-    /* TODO: Set a volatile flag and handle transition in Fault_Update()     */
+    s_estop_pending = 1U;
 }
 
 /**
@@ -87,7 +94,7 @@ void Fault_Clear(FaultCode_t code)
 
     if (!Fault_AnyActive())
     {
-        Mode_Set(MODE_IDLE);
+        Mode_Set(MOTOR_IDLE);
     }
 }
 
@@ -97,7 +104,7 @@ void Fault_ClearAll(void)
     s_active_faults &= FAULT_ESTOP;   /* Preserve ESTOP bit if set          */
     if (!Fault_AnyActive())
     {
-        Mode_Set(MODE_IDLE);
+        Mode_Set(MOTOR_IDLE);
     }
 }
 

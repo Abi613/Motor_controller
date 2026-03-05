@@ -1,8 +1,6 @@
 #include "mode.h"
 #include "motor.h"
 #include "fault.h"
-#include "gpio.h"
-#include "board.h"
 
 static SystemMode_t s_current_mode  = MOTOR_IDLE;
 static SystemMode_t s_previous_mode = MOTOR_IDLE;
@@ -24,7 +22,7 @@ void Mode_Init(void)
 
 void Mode_Update(void)
 {
-    if (Fault_IsActive() && (s_current_mode != MOTOR_FAULT))
+    if (Fault_AnyActive() && (s_current_mode != MOTOR_FAULT))
     {
         Mode_Set(MOTOR_FAULT);
     }
@@ -73,7 +71,7 @@ static uint8_t Mode_IsTransitionValid(SystemMode_t from, SystemMode_t to)
         case MOTOR_OPEN_LOOP:   return ((to == MOTOR_CLOSED_LOOP) ||
                                         (to == MOTOR_IDLE))        ? 1U : 0U;
         case MOTOR_CLOSED_LOOP: return (to == MOTOR_IDLE)          ? 1U : 0U;
-        case MOTOR_FAULT:       return (!Fault_IsActive() &&
+        case MOTOR_FAULT:       return (!Fault_AnyActive() &&
                                         (to == MOTOR_IDLE))        ? 1U : 0U;
         default:                return 0U;
     }

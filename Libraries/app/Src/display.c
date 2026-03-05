@@ -16,6 +16,7 @@
 #include "motor.h"
 #include "fault.h"
 #include "ssd1306.h"
+#include "pwm.h"
 #include <stdio.h>
 
 /*===========================================================================*/
@@ -31,6 +32,7 @@ static char s_line_buf[32];    /**< Scratch buffer for snprintf formatting   */
  */
 void Display_Init(void)
 {
+    (void)SSD1306_Init();
     SSD1306_Clear();
     SSD1306_PrintString(0, 0, "Motor Ctrl v1.0");
     SSD1306_PrintString(0, 24, "Initializing...");
@@ -47,15 +49,16 @@ void Display_Update(void)
 
     switch (Mode_Get())
     {
-        case MODE_RUN:
+        case MOTOR_ALIGN_1:
+        case MOTOR_ALIGN_2:
+        case MOTOR_OPEN_LOOP:
+        case MOTOR_CLOSED_LOOP:
             Display_ShowRunData();
             break;
-        case MODE_FAULT:
-        case MODE_ESTOP:
+        case MOTOR_FAULT:
             Display_ShowFault();
             break;
-        case MODE_IDLE:
-        case MODE_STARTUP:
+        case MOTOR_IDLE:
         default:
             Display_ShowIdle();
             break;
@@ -89,7 +92,7 @@ void Display_ShowRunData(void)
     snprintf(s_line_buf, sizeof(s_line_buf), "I:  %.2f A", Motor_GetCurrent());
     SSD1306_PrintString(0, 32, s_line_buf);
 
-    snprintf(s_line_buf, sizeof(s_line_buf), "Duty: %d%%", (int)Motor_GetTargetSpeed());
+    snprintf(s_line_buf, sizeof(s_line_buf), "Duty: %u%%", (unsigned)PWM_GetDuty());
     SSD1306_PrintString(0, 48, s_line_buf);
 }
 
