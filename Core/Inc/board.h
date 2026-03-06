@@ -66,6 +66,9 @@
 #define ADC_VBUS_PIN            GPIO_PIN_5
 #define ADC_VBUS_PORT           GPIOA
 #define ADC_VBUS_CHANNEL        ADC_CHANNEL_5
+#define ADC_SPEED_POT_PIN       GPIO_PIN_6
+#define ADC_SPEED_POT_PORT      GPIOA
+#define ADC_SPEED_POT_CHANNEL   ADC_CHANNEL_6
 
 /* Optional ADC BEMF sampling channels */
 #define ADC_BEMF_U_CHANNEL      ADC_CHANNEL_0
@@ -106,6 +109,8 @@ extern TIM_HandleTypeDef htim1;
 #define FAULT_VBUS_UV_LIMIT_V   8.0f
 #define STALL_TIMEOUT_MS        120U
 #define STARTUP_DUTY_PCT        20U
+#define MOTOR_MIN_SPEED_RPM     300.0f
+#define MOTOR_MAX_SPEED_RPM     3000.0f
 
 /* 0=sensorless BEMF ADC, 1=hall sensors */
 #define MOTOR_COMM_MODE_DEFAULT 0U

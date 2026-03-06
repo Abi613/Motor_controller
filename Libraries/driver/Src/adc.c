@@ -12,6 +12,7 @@ static uint32_t ADC_GetHalChannel(ADC_Channel_t channel)
     {
         case ADC_CH_CURRENT: return ADC_CURRENT_CHANNEL;
         case ADC_CH_VBUS:    return ADC_VBUS_CHANNEL;
+        case ADC_CH_SPEED_POT:return ADC_SPEED_POT_CHANNEL;
         case ADC_CH_BEMF_U:  return ADC_BEMF_U_CHANNEL;
         case ADC_CH_BEMF_V:  return ADC_BEMF_V_CHANNEL;
         case ADC_CH_BEMF_W:  return ADC_BEMF_W_CHANNEL;
@@ -96,6 +97,12 @@ float ADC_GetVbus_V(void)
 {
     float adc_v = ((float)ADC_GetRaw(ADC_CH_VBUS) / (float)ADC_RESOLUTION) * ((float)ADC_VREF_MV / 1000.0f);
     return adc_v * VBUS_DIVIDER_RATIO;
+}
+
+
+float ADC_GetSpeedPotNorm(void)
+{
+    return (float)ADC_GetRaw(ADC_CH_SPEED_POT) / (float)ADC_RESOLUTION;
 }
 
 float ADC_GetBemf_V(uint8_t phase)

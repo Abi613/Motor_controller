@@ -87,7 +87,7 @@ void Display_ShowRunData(void)
 {
     SSD1306_PrintString(0, 0, "MODE: RUN");
 
-    snprintf(s_line_buf, sizeof(s_line_buf), "Spd: %.0f RPM", Motor_GetActualSpeed());
+    snprintf(s_line_buf, sizeof(s_line_buf), "Spd: %.0f/%.0f", Motor_GetActualSpeed(), Motor_GetTargetSpeed());
     SSD1306_PrintString(0, 16, s_line_buf);
 
     snprintf(s_line_buf, sizeof(s_line_buf), "I:  %.2f A", Motor_GetCurrent());

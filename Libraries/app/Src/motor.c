@@ -53,7 +53,7 @@ static void     UpdateAlignment(SystemMode_t phase);
 static void     UpdateOpenLoop(void);
 static void     UpdateClosedLoop(void);
 static uint32_t GetTickMs(void);
-static uint8_t  ReadHallStep(uint8_t *step_out);
+static void     UpdateTargetFromPot(void);
 
 void Motor_Init(void)
 {
@@ -96,23 +96,15 @@ void Motor_Update(void)
         return;
     }
 
-    if (MOTOR_COMM_MODE_DEFAULT == 1U)
-    {
-        uint8_t hall_step = 0U;
-        if (ReadHallStep(&hall_step) != 0U)
-        {
-            s_comm_step = hall_step;
-            Commutate(s_comm_step, s_duty_pct);
-            s_last_comm_ms = now;
-        }
-    }
-    else if ((Mode_Get() == MOTOR_OPEN_LOOP) || (Mode_Get() == MOTOR_CLOSED_LOOP))
+    if ((Mode_Get() == MOTOR_OPEN_LOOP) || (Mode_Get() == MOTOR_CLOSED_LOOP))
     {
         if ((now >= s_blank_end_ms) && (ADC_BEMFZeroCrossDetected() != 0U))
         {
             Motor_BEMF_ZeroCrossISR();
         }
     }
+
+    UpdateTargetFromPot();
 
     switch (Mode_Get())
     {
@@ -280,27 +272,19 @@ static void Commutate(uint8_t step, uint8_t duty)
     ADC_SelectBEMFChannel(s_comm_table[step].float_phase, s_comm_table[step].zc_rising);
 }
 
+
+static void UpdateTargetFromPot(void)
+{
+    float pot_norm = ADC_GetSpeedPotNorm();
+
+    if (pot_norm < 0.0f) { pot_norm = 0.0f; }
+    if (pot_norm > 1.0f) { pot_norm = 1.0f; }
+
+    s_target_speed = MOTOR_MIN_SPEED_RPM +
+                     (pot_norm * (MOTOR_MAX_SPEED_RPM - MOTOR_MIN_SPEED_RPM));
+}
+
 static uint32_t GetTickMs(void)
 {
     return Board_GetTickMs();
-}
-
-static uint8_t ReadHallStep(uint8_t *step_out)
-{
-    uint8_t hall_state = 0U;
-
-    hall_state |= (GPIO_ReadPin(HALL_U_PORT, HALL_U_PIN) == GPIO_PIN_SET) ? 0x4U : 0U;
-    hall_state |= (GPIO_ReadPin(HALL_V_PORT, HALL_V_PIN) == GPIO_PIN_SET) ? 0x2U : 0U;
-    hall_state |= (GPIO_ReadPin(HALL_W_PORT, HALL_W_PIN) == GPIO_PIN_SET) ? 0x1U : 0U;
-
-    switch (hall_state)
-    {
-        case 0x1U: *step_out = 0U; return 1U;
-        case 0x5U: *step_out = 1U; return 1U;
-        case 0x4U: *step_out = 2U; return 1U;
-        case 0x6U: *step_out = 3U; return 1U;
-        case 0x2U: *step_out = 4U; return 1U;
-        case 0x3U: *step_out = 5U; return 1U;
-        default:   return 0U;
-    }
 }
