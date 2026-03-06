@@ -12,6 +12,7 @@ typedef enum
 {
     ADC_CH_CURRENT = 0,
     ADC_CH_VBUS,
+    ADC_CH_SPEED_POT,
     ADC_CH_BEMF_U,
     ADC_CH_BEMF_V,
     ADC_CH_BEMF_W,
@@ -24,6 +25,7 @@ uint16_t ADC_GetRaw(ADC_Channel_t channel);
 float    ADC_GetCurrent_A(void);
 float    ADC_GetVbus_V(void);
 float    ADC_GetBemf_V(uint8_t phase);
+float    ADC_GetSpeedPotNorm(void);
 void     ADC_ConversionComplete_Callback(void);
 void     ADC_SelectBEMFChannel(uint8_t phase, uint8_t rising);
 uint8_t  ADC_BEMFZeroCrossDetected(void);
